@@ -37,7 +37,7 @@ function UsersPage() {
   }, []);
 
   return (
-    <div className="grid grid-cols-4 items-center mt-10 gap-4 ">
+    <div className="grid grid-cols-4 sm:grid-cols-1 md:grid-cols-2  lg:grid-cols-3 items-center mt-10 gap-4 ">
       {/* Show Users  */}
       {filteredData?.map((user, key) => (
         <div key={key}>
