@@ -5,8 +5,10 @@ import UserCard from "../components/user_card";
 import { CgSpinner } from "react-icons/cg";
 import { UserContext } from "./main_layout";
 function UsersPage() {
-  const usersCollectionRef = collection(db, "users");
 
+  const usersCollectionRef = collection(db, "users");
+  
+  //state management for the users
   const { setUsers, filteredData, setFilteredData } = React.useContext(UserContext);
   const [loading, setLoading] = React.useState(true);
   React.useEffect(() => {
@@ -25,8 +27,10 @@ function UsersPage() {
       
     };
     getUsers();
+    //call the function to get the users every 10 seconds
     const interval = setInterval(() => getUsers(), 10000);
     return () => {
+      //clear interval when the component is unmounted
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -7,11 +7,12 @@ import {MainLayout} from '../pages/main_layout';
 
 
 function RoutesConfig() {
+  //router for the application for differet pages
   return (
     <Router>
       <Routes>
-        <Route exact path="/" element={<MainLayout />} />
-        <Route exact path="/users" element={<RegisterUser/>} />
+        <Route  path="/" element={<MainLayout />} />
+        <Route  path="/users" element={<RegisterUser/>} />
       </Routes>
     </Router>
   );
