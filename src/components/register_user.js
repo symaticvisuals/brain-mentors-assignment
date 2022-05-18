@@ -1,12 +1,18 @@
 import { addDoc, collection } from "firebase/firestore";
-import React, { useEffect } from "react";
+import React from "react";
 import ImageUploading from "react-images-uploading";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebase-config";
-import { storage } from "../firebase/firebase-config";
-import { getDownloadURL, listAll, ref, uploadBytes } from "firebase/storage";
-import { v4 } from "uuid";
+
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 function RegisterUser() {
+
+  
   //state to store the new user object
   const [user, setUser] = React.useState({
     name: "",
@@ -16,52 +22,65 @@ function RegisterUser() {
   const input_style =
     "bg-transparent px-4 py-3 border-2 border-black rounded-lg focus:bg-white";
   //store image object
-  const [image, setImage] = React.useState([]);
-  const [imageList, setImageList] = React.useState([]);
-  const [imageURL, setImageURL] = React.useState(null);
-  const imageListRef = ref(storage, "upload/");
-  const uploadImage = async () => {
-    if (image === null) return;
-    const uploadTask = ref(storage, `upload/${image[0].file.name}`);
-    uploadBytes(uploadTask, image[0]).then((snapshot) => {
-      alert("Image Uploaded Successfully");
-      getDownloadURL(snapshot.ref).then((url) => {
-         if (user.name !== "" && user.designation !== "") {
-      console.log("URL:" + url);
+  const [image] = React.useState([]);
+  const [imageUrl, setImageUrl] = React.useState("");
+  const navigate = useNavigate();
+
+  //store images in firebase storage
+  const storeImage = async (image) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage();
+      const fileName = image[0].file.name;
+      const storageRef = ref(storage, "uploads/" + fileName);
+      const uploadTask = uploadBytesResumable(storageRef, image[0].file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          // eslint-disable-next-line
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setImageUrl(downloadURL);
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
+  };
+
+  const createUser = async () => {
+    //creating new user object
+    if (user.name !== "" && user.designation !== "" && imageUrl !== "") {
       addDoc(usersCollectionRef, {
         name: user.name,
         designation: user.designation,
-        image: url,
+        image: imageUrl,
       });
       navigate("/", { replace: true });
+    } else {
+      alert("Please fill all the fields");
     }
-      }
-      );
-    });
-    
   };
 
-  useEffect(() => {
-    listAll(imageListRef)
-      .then((res) => {
-        console.log(res);
-        setImageList(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  const createUser = async () => {
-    uploadImage();
-   
-  };
   //a function to store the image object on change
-  const onFileChange = (imageList) => {
-    setImage(imageList);
+  const onFileChange = async (imageList) => {
+    storeImage(imageList);
   };
-
-  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-4 max-w-screen-xl m-auto">
@@ -100,7 +119,7 @@ function RegisterUser() {
       </div>
 
       <button
-        onClick={uploadImage}
+        onClick={createUser}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded">
         Register User
       </button>
