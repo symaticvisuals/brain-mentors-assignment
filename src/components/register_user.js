@@ -83,7 +83,7 @@ function RegisterUser() {
   };
 
   return (
-    <div className="flex flex-col gap-4 max-w-screen-xl m-auto">
+    <div className="flex flex-col gap-4 max-w-screen-xl m-auto mx-[10vw]  sm:mx-[4vw]">
       <h1 className="font-sans text-4xl mt-10 font-semibold">Add User</h1>
 
       <input

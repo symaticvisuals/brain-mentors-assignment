@@ -15,7 +15,7 @@ function MainLayout() {
   return (
     <UserContext.Provider
       value={{ users, setUsers, filteredData, setFilteredData }}>
-      <div className="m-auto max-w-screen-xl bg-slate-200 h-screen">
+      <div className="m-auto max-w-screen-md mx-[10vw]  sm:mx-[4vw]  bg-slate-200 min-h-screen">
         {/* TopBar */}
         <div className="flex items-center justify-between pt-10">
           <div className="">
